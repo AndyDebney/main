@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: raw
     database: ADEBNEYDEMODB
-    schema: RAW
+    schema: RAW_P2
     tables:
       - name: orders
         identifier: RAW_ORDERS

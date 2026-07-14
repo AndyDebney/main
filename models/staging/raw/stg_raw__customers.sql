@@ -3,7 +3,7 @@
 with source as (
 
     select *
-    from {{ source('raw', 'customers') }}
+    from {{ source('raw_p2', 'customers') }}
 
 )
 
