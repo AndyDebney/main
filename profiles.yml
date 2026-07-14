@@ -7,9 +7,9 @@ default:
       user: "<your_username>"
       password: "<your_password>"
       role: "<your_role>"
-      database: "<your_database>"
+      database: "ADEBNEYDEMODB"
       warehouse: "<your_warehouse>"
-      schema: "<your_schema>"
+      schema: "DBT_ADEBNEY"
       threads: 4
       client_session_keep_alive: false
       query_tag: "dbt_my_new_project"
