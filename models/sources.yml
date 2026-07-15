@@ -1,11 +1,16 @@
 version: 2
 
 sources:
-  - name: raw
+  - name: raw_p2
     database: ADEBNEYDEMODB
-    schema: RAW
+    schema: RAW_P2
     tables:
       - name: orders
         identifier: RAW_ORDERS
       - name: customers
         identifier: RAW_CUSTOMERS
+      - name: products
+        identifier: RAW_PRODUCTS
+      - name: order_items
+        identifier: RAW_ORDER_ITEMS
+
