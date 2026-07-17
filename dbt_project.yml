@@ -28,7 +28,7 @@ models:
   my_new_project:
 
     staging:
-      raw:
+      raw: raw
 
         +materialized: table
         +schema: staging
