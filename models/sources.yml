@@ -1,9 +1,9 @@
 version: 2
 
 sources:
-  - name: raw_p2
-    database: ADEBNEYDEMODB
-    schema: RAW_P2
+  - name: raw
+    database: ADEBNEYDEMODB2
+    schema: RAW
     tables:
       - name: orders
         identifier: RAW_ORDERS
