@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: Staged orders data from the raw orders source with standardized identifier column names.
+    columns:
+      - name: order_id
+        description: Primary key for each order.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: Identifier for the customer who placed the order.
+        data_tests:
+          - not_null
+
+      - name: ordered_at
+        description: Timestamp when the order was placed.
+
+      - name: store_id
+        description: Identifier for the store associated with the order.
+
+      - name: subtotal
+        description: Order subtotal before tax.
+
+      - name: tax_paid
+        description: Tax amount paid on the order.
+
+      - name: order_total
+        description: Total order amount including tax.
