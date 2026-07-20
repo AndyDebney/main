@@ -29,3 +29,92 @@ models:
 
       - name: order_total
         description: Total order amount including tax.
+
+
+  - name: stg_customers
+    description: Staged customers data from the raw customers source with standardized identifier column names.
+    columns:
+      - name: customer_id
+        description: Primary key for each customer.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_name
+        description: Customer name.
+
+  - name: stg_order_items
+    description: Staged order item data from the raw order items source with standardized identifier column names.
+    columns:
+      - name: order_item_id
+        description: Primary key for each order item record.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: order_id
+        description: Identifier for the order associated with the item.
+        data_tests:
+          - not_null
+
+      - name: product_sku
+        description: SKU for the product included in the order item.
+        data_tests:
+          - not_null
+
+  - name: stg_products
+    description: Staged products data from the raw products source with standardized product attribute column names.
+    columns:
+      - name: product_sku
+        description: Primary SKU for each product.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: product_name
+        description: Product display name.
+
+      - name: product_type
+        description: Product category or type.
+
+      - name: product_price
+        description: Product price from the raw source.
+
+      - name: product_description
+        description: Product description from the raw source.
+
+  - name: stg_stores
+    description: Staged stores data from the raw stores source with standardized identifier column names.
+    columns:
+      - name: store_id
+        description: Primary key for each store.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: store_name
+        description: Store name.
+
+      - name: opened_at
+        description: Timestamp when the store opened.
+
+      - name: tax_rate
+        description: Tax rate associated with the store.
+
+  - name: stg_supplies
+    description: Staged supplies data from the raw supplies source with standardized supply attribute column names.
+    columns:
+      - name: supply_id
+        description: Identifier for the supply record.
+
+      - name: supply_name
+        description: Supply name.
+
+      - name: supply_cost
+        description: Cost of the supply item.
+
+      - name: is_perishable
+        description: Whether the supply item is perishable.
+
+      - name: product_sku
+        description: SKU for the product associated with the supply item.
