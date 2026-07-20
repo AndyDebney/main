@@ -5,12 +5,52 @@ sources:
     database: ADEBNEYDEMODB2
     schema: RAW
     tables:
-      - name: orders
-        identifier: RAW_ORDERS
       - name: customers
         identifier: RAW_CUSTOMERS
-      - name: products
-        identifier: RAW_PRODUCTS
+        columns:
+          - name: id
+          - name: name
+
+      - name: orders
+        identifier: RAW_ORDERS
+        columns:
+          - name: id
+          - name: customer
+          - name: ordered_at
+          - name: store_id
+          - name: subtotal
+          - name: tax_paid
+          - name: order_total
+
       - name: order_items
         identifier: RAW_ORDER_ITEMS
+        columns:
+          - name: id
+          - name: order_id
+          - name: sku
 
+      - name: products
+        identifier: RAW_PRODUCTS
+        columns:
+          - name: sku
+          - name: name
+          - name: type
+          - name: price
+          - name: description
+
+      - name: stores
+        identifier: RAW_STORES
+        columns:
+          - name: id
+          - name: name
+          - name: opened_at
+          - name: tax_rate
+
+      - name: supplies
+        identifier: RAW_SUPPLIES
+        columns:
+          - name: id
+          - name: name
+          - name: cost
+          - name: perishable
+          - name: sku
