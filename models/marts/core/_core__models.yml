@@ -1,0 +1,143 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: Customer dimension built from `int_customers`.
+    columns:
+      - name: customer_id
+        description: Primary key for each customer.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_name
+        description: Customer name.
+
+  - name: dim_stores
+    description: Store dimension built from `int_stores`.
+    columns:
+      - name: store_id
+        description: Primary key for each store.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: store_name
+        description: Store name.
+
+      - name: opened_at
+        description: Timestamp when the store opened.
+
+      - name: tax_rate
+        description: Tax rate associated with the store.
+
+  - name: dim_products
+    description: Product dimension built from `int_products`.
+    columns:
+      - name: product_sku
+        description: Primary SKU for each product.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: product_name
+        description: Product display name.
+
+      - name: product_type
+        description: Product category or type.
+
+      - name: product_price
+        description: Product price cast to a numeric type.
+
+      - name: product_description
+        description: Product description.
+
+  - name: fct_orders
+    description: Order-level fact table with one row per order and cast order measures.
+    columns:
+      - name: order_id
+        description: Primary key for each order.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: Foreign key to the customer who placed the order.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_id
+
+      - name: store_id
+        description: Foreign key to the store associated with the order.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_stores')
+                field: store_id
+
+      - name: ordered_at
+        description: Timestamp when the order was placed.
+
+      - name: subtotal
+        description: Order subtotal before tax.
+
+      - name: tax_paid
+        description: Tax amount paid on the order.
+
+      - name: order_total
+        description: Total order amount including tax.
+
+  - name: fct_order_items
+    description: Order item fact table with one row per order item and product context for slicing.
+    columns:
+      - name: order_item_id
+        description: Primary key for each order item.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: order_id
+        description: Foreign key to the order.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('fct_orders')
+                field: order_id
+
+      - name: customer_id
+        description: Customer associated with the order item through the parent order.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_id
+
+      - name: store_id
+        description: Store associated with the order item through the parent order.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_stores')
+                field: store_id
+
+      - name: ordered_at
+        description: Timestamp when the parent order was placed.
+
+      - name: product_sku
+        description: Foreign key to the product.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_products')
+                field: product_sku
+
+      - name: product_name
+        description: Product display name.
+
+      - name: product_type
+        description: Product category or type.
+
+      - name: product_price
+        description: Product price cast to a numeric type.
