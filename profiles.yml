@@ -7,7 +7,7 @@ default:
       user: "<your_username>"
       password: "<your_password>"
       role: "<your_role>"
-      database: "ADEBNEYDEMODB"
+      database: "ADEBNEYDEMODB2"
       warehouse: "<your_warehouse>"
       schema: "DBT_ADEBNEY"
       threads: 4

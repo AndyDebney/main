@@ -1,0 +1,113 @@
+version: 2
+
+models:
+  - name: int_orders
+    description: Intermediate orders model built from `stg_orders` for reusable downstream transformations.
+    columns:
+      - name: order_id
+        description: Primary key for each order.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: Identifier for the customer who placed the order.
+
+      - name: ordered_at
+        description: Timestamp when the order was placed.
+
+      - name: store_id
+        description: Identifier for the store associated with the order.
+
+      - name: subtotal
+        description: Order subtotal before tax.
+
+      - name: tax_paid
+        description: Tax amount paid on the order.
+
+      - name: order_total
+        description: Total order amount including tax.
+
+  - name: int_customers
+    description: Intermediate customers model built from `stg_customers` for reusable downstream transformations.
+    columns:
+      - name: customer_id
+        description: Primary key for each customer.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_name
+        description: Customer name.
+
+  - name: int_order_items
+    description: Intermediate order items model built from `stg_order_items` for reusable downstream transformations.
+    columns:
+      - name: order_item_id
+        description: Primary key for each order item record.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: order_id
+        description: Identifier for the order associated with the item.
+
+      - name: product_sku
+        description: SKU for the product included in the order item.
+
+  - name: int_products
+    description: Intermediate products model built from `stg_products` for reusable downstream transformations.
+    columns:
+      - name: product_sku
+        description: Primary SKU for each product.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: product_name
+        description: Product display name.
+
+      - name: product_type
+        description: Product category or type.
+
+      - name: product_price
+        description: Product price from the raw source.
+
+      - name: product_description
+        description: Product description from the raw source.
+
+  - name: int_stores
+    description: Intermediate stores model built from `stg_stores` for reusable downstream transformations.
+    columns:
+      - name: store_id
+        description: Primary key for each store.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: store_name
+        description: Store name.
+
+      - name: opened_at
+        description: Timestamp when the store opened.
+
+      - name: tax_rate
+        description: Tax rate associated with the store.
+
+  - name: int_supplies
+    description: Intermediate supplies model built from `stg_supplies` for reusable downstream transformations.
+    columns:
+      - name: supply_id
+        description: Identifier for the supply record.
+
+      - name: supply_name
+        description: Supply name.
+
+      - name: supply_cost
+        description: Cost of the supply item.
+
+      - name: is_perishable
+        description: Whether the supply item is perishable.
+
+      - name: product_sku
+        description: SKU for the product associated with the supply item.
