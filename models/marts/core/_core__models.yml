@@ -141,3 +141,17 @@ models:
 
       - name: product_price
         description: Product price cast to a numeric type.
+
+
+exposures:
+  - name: tableau_orders_report
+    label: Tableau Orders Report
+    type: dashboard
+    maturity: medium
+    url: https://tableau.example.com/views/orders-report
+    description: Tableau report powered by the `fct_orders` fact table.
+    depends_on:
+      - ref('fct_orders')
+    owner:
+      name: Analytics
+      email: analytics@example.com
