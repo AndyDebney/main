@@ -6,8 +6,7 @@ with orders as (
         store_id,
         subtotal,
         tax_paid,
-        order_total,
-        row + 1
+        order_total
     from {{ ref('stg_orders') }}
 )
 
