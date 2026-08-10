@@ -90,6 +90,7 @@ models:
 
 
 
+
       - name: opened_at
         description: Timestamp when the store opened.
 
