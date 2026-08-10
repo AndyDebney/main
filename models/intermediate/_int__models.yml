@@ -90,7 +90,9 @@ models:
         data_tests:
           - accepted_values:
               arguments:
-                values: ['Brooklyn', 'Chicago', 'Los Angeles', 'New Orleans', 'Philadelphia','San Francisco']
+                values: ['Brooklyn', 'Chicago', 'Los Angeles', 'New Orleans', 'Philadelphia']
+
+
 
       - name: opened_at
         description: Timestamp when the store opened.
