@@ -92,6 +92,8 @@ models:
               arguments:
                 values: ['Brooklyn', 'Chicago', 'Los Angeles', 'New Orleans', 'Philadelphia','San Francisco']
 
+
+
       - name: opened_at
         description: Timestamp when the store opened.
 
