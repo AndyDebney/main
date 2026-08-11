@@ -143,6 +143,34 @@ models:
         description: Product price cast to a numeric type.
 
 
+  - name: fct_product_supplies
+    description: Product supply cost fact table with one row per supply item and its associated product SKU.
+    columns:
+      - name: supply_id
+        description: Primary key for each supply item.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: product_sku
+        description: Foreign key to the product this supply supports.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_products')
+                field: product_sku
+
+      - name: supply_name
+        description: Name of the supply item.
+
+      - name: supply_cost
+        description: Cost of the supply item cast to a numeric type.
+
+      - name: is_perishable
+        description: Whether the supply item is perishable.
+
+
 exposures:
   - name: tableau_orders_report
     label: Tableau Orders Report
@@ -152,6 +180,30 @@ exposures:
     description: Tableau report powered by the `fct_orders` fact table.
     depends_on:
       - ref('fct_orders')
+    owner:
+      name: Analytics
+      email: analytics@example.com
+
+  - name: tableau_orders__items_report
+    label: Tableau Orders Items Report
+    type: dashboard
+    maturity: medium
+    url: https://tableau.example.com/views/orders-items-report
+    description: Tableau report powered by the `fct_orders_items` fact table.
+    depends_on:
+      - ref('fct_order_items')
+    owner:
+      name: Analytics
+      email: analytics@example.com
+
+  - name: tableau_product_supplies_report
+    label: Tableau Product Supplies Report
+    type: dashboard
+    maturity: medium
+    url: https://tableau.example.com/views/product_supplies_report
+    description: Tableau report powered by the `fct_product_suppliers` fact table.
+    depends_on:
+      - ref('fct_product_supplies')
     owner:
       name: Analytics
       email: analytics@example.com
