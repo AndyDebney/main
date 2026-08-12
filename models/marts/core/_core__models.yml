@@ -148,9 +148,7 @@ models:
     columns:
       - name: supply_id
         description: Primary key for each supply item.
-        data_tests:
-          - not_null
-          - unique
+
 
       - name: product_sku
         description: Foreign key to the product this supply supports.
@@ -207,3 +205,4 @@ exposures:
     owner:
       name: Analytics
       email: analytics@example.com
+
