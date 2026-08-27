@@ -3,7 +3,6 @@ with supplies as (
    from {{ ref('int_supplies') }}
 )
 
-
 select
    supply_id,
    product_sku,
