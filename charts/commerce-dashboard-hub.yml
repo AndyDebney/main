@@ -535,8 +535,7 @@ tabs:
         - executive_monthly_revenue
         - cols: [executive_revenue_by_store, executive_product_sales_mix]
         - executive_top_customers
-    - id: store-performance
-      title: Store Performance & Expansion
+    - title: Store Performance & Expansion
       notes: Location-level trends and like-for-like context across different store ages.
       rows:
         - cols: [store_total_revenue, store_total_orders, store_average_order_value, store_active_stores]
