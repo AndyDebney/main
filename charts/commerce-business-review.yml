@@ -278,7 +278,8 @@ charts:
 rows:
   - cols: [total_revenue, total_orders, average_order_value, total_customers]
   - monthly_revenue
-  - cols: [revenue_by_store, store_scorecard]
+  - revenue_by_store
+  - store_scorecard
   - cols: [product_sales_mix, top_products_table]
   - customer_loyalty
   - seasonal_revenue
