@@ -1,0 +1,557 @@
+title: Commerce Dashboard Hub
+source: default
+
+queries:
+  executive_headline_metrics:
+    sql: |
+      SELECT
+        SUM(order_total) AS total_revenue,
+        COUNT(*) AS total_orders,
+        AVG(order_total) AS average_order_value,
+        COUNT(DISTINCT customer_id) AS total_customers
+      FROM DBT_ADEBNEY.FCT_ORDERS
+    formats:
+      total_revenue: currency
+      total_orders: compact
+      average_order_value: currency_whole
+      total_customers: compact
+
+  executive_monthly_sales:
+    sql: |
+      SELECT
+        DATE_TRUNC('month', ordered_at)::DATE AS order_month,
+        SUM(order_total) AS revenue,
+        COUNT(*) AS orders,
+        AVG(order_total) AS average_order_value
+      FROM DBT_ADEBNEY.FCT_ORDERS
+      GROUP BY 1
+      ORDER BY 1
+    formats:
+      revenue: currency
+      orders: compact
+      average_order_value: currency_whole
+
+  executive_sales_by_store:
+    sql: |
+      SELECT
+        s.store_name,
+        SUM(o.order_total) AS revenue,
+        COUNT(*) AS orders,
+        AVG(o.order_total) AS average_order_value
+      FROM DBT_ADEBNEY.FCT_ORDERS o
+      JOIN DBT_ADEBNEY.DIM_STORES s ON o.store_id = s.store_id
+      GROUP BY 1
+      ORDER BY revenue DESC
+    formats:
+      revenue: currency
+      orders: compact
+      average_order_value: currency_whole
+
+  executive_product_mix:
+    sql: |
+      SELECT
+        product_type,
+        COUNT(*) AS line_items,
+        SUM(product_price) AS product_sales
+      FROM DBT_ADEBNEY.FCT_ORDER_ITEMS
+      GROUP BY 1
+      ORDER BY product_sales DESC
+    formats:
+      line_items: compact
+      product_sales: currency
+
+  executive_top_customers:
+    sql: |
+      SELECT
+        c.customer_name,
+        COUNT(*) AS orders,
+        SUM(o.order_total) AS revenue,
+        AVG(o.order_total) AS average_order_value
+      FROM DBT_ADEBNEY.FCT_ORDERS o
+      JOIN DBT_ADEBNEY.DIM_CUSTOMERS c ON o.customer_id = c.customer_id
+      GROUP BY 1
+      ORDER BY revenue DESC
+      LIMIT 10
+    formats:
+      orders: compact
+      revenue: currency
+      average_order_value: currency_whole
+
+  store_network_summary:
+    sql: |
+      SELECT
+        SUM(order_total) AS total_revenue,
+        COUNT(*) AS total_orders,
+        AVG(order_total) AS average_order_value,
+        COUNT(DISTINCT store_id) AS active_stores
+      FROM DBT_ADEBNEY.FCT_ORDERS
+    formats:
+      total_revenue: currency
+      total_orders: compact
+      average_order_value: currency_whole
+      active_stores: compact
+
+  store_monthly_performance:
+    sql: |
+      SELECT
+        DATE_TRUNC('month', o.ordered_at)::DATE AS order_month,
+        s.store_name,
+        SUM(o.order_total) AS revenue,
+        COUNT(*) AS orders,
+        AVG(o.order_total) AS average_order_value
+      FROM DBT_ADEBNEY.FCT_ORDERS o
+      JOIN DBT_ADEBNEY.DIM_STORES s ON o.store_id = s.store_id
+      GROUP BY 1, 2
+      ORDER BY 1, 2
+    formats:
+      revenue: currency
+      orders: compact
+      average_order_value: currency_whole
+
+  store_lifetime_performance:
+    sql: |
+      SELECT
+        s.store_name,
+        s.opened_at::DATE AS opened_on,
+        SUM(o.order_total) AS revenue,
+        COUNT(*) AS orders,
+        COUNT(DISTINCT o.customer_id) AS customers,
+        AVG(o.order_total) AS average_order_value,
+        DATEDIFF('month', MIN(o.ordered_at), MAX(o.ordered_at)) + 1 AS operating_months,
+        SUM(o.order_total) / NULLIF(DATEDIFF('month', MIN(o.ordered_at), MAX(o.ordered_at)) + 1, 0) AS average_monthly_revenue
+      FROM DBT_ADEBNEY.DIM_STORES s
+      JOIN DBT_ADEBNEY.FCT_ORDERS o ON s.store_id = o.store_id
+      GROUP BY 1, 2
+      ORDER BY revenue DESC
+    formats:
+      revenue: currency
+      orders: compact
+      customers: compact
+      average_order_value: currency_whole
+      average_monthly_revenue: currency
+
+  store_recent_performance:
+    sql: |
+      WITH latest_month AS (
+        SELECT DATE_TRUNC('month', MAX(ordered_at)) AS month_start
+        FROM DBT_ADEBNEY.FCT_ORDERS
+      )
+      SELECT
+        s.store_name,
+        SUM(o.order_total) AS revenue_last_12_months,
+        COUNT(*) AS orders_last_12_months,
+        AVG(o.order_total) AS average_order_value,
+        COUNT(DISTINCT o.customer_id) AS customers
+      FROM DBT_ADEBNEY.FCT_ORDERS o
+      JOIN DBT_ADEBNEY.DIM_STORES s ON o.store_id = s.store_id
+      CROSS JOIN latest_month lm
+      WHERE o.ordered_at >= DATEADD('month', -11, lm.month_start)
+        AND o.ordered_at < DATEADD('month', 1, lm.month_start)
+      GROUP BY 1
+      ORDER BY revenue_last_12_months DESC
+    formats:
+      revenue_last_12_months: currency
+      orders_last_12_months: compact
+      average_order_value: currency_whole
+      customers: compact
+
+  review_repeat_purchase_segments:
+    sql: |
+      WITH customer_orders AS (
+        SELECT customer_id, COUNT(*) AS orders, SUM(order_total) AS revenue
+        FROM DBT_ADEBNEY.FCT_ORDERS
+        GROUP BY 1
+      )
+      SELECT
+        CASE
+          WHEN orders = 1 THEN 'One order'
+          WHEN orders BETWEEN 2 AND 4 THEN '2–4 orders'
+          WHEN orders BETWEEN 5 AND 9 THEN '5–9 orders'
+          ELSE '10+ orders'
+        END AS order_frequency_segment,
+        COUNT(*) AS customers,
+        SUM(orders) AS orders,
+        SUM(revenue) AS revenue
+      FROM customer_orders
+      GROUP BY 1
+      ORDER BY CASE order_frequency_segment
+        WHEN 'One order' THEN 1
+        WHEN '2–4 orders' THEN 2
+        WHEN '5–9 orders' THEN 3
+        ELSE 4
+      END
+    formats:
+      customers: compact
+      orders: compact
+      revenue: currency
+
+  review_top_products:
+    sql: |
+      SELECT
+        product_name,
+        product_type,
+        COUNT(*) AS line_items,
+        SUM(product_price) AS product_sales
+      FROM DBT_ADEBNEY.FCT_ORDER_ITEMS
+      GROUP BY 1, 2
+      ORDER BY product_sales DESC
+      LIMIT 10
+    formats:
+      line_items: compact
+      product_sales: currency
+
+  review_seasonality:
+    sql: |
+      SELECT
+        EXTRACT(month FROM ordered_at) AS calendar_month,
+        SUM(order_total) AS revenue,
+        COUNT(*) AS orders,
+        AVG(order_total) AS average_order_value
+      FROM DBT_ADEBNEY.FCT_ORDERS
+      GROUP BY 1
+      ORDER BY 1
+    formats:
+      revenue: currency
+      orders: compact
+      average_order_value: currency_whole
+
+charts:
+  executive_total_revenue:
+    query: executive_headline_metrics
+    type: kpi
+    value: total_revenue
+    label: Total revenue
+    style:
+      value:
+        format: currency
+  executive_total_orders:
+    query: executive_headline_metrics
+    type: kpi
+    value: total_orders
+    label: Orders
+    style:
+      value:
+        format: compact
+  executive_average_order_value:
+    query: executive_headline_metrics
+    type: kpi
+    value: average_order_value
+    label: Average order value
+    style:
+      value:
+        format: currency_whole
+  executive_total_customers:
+    query: executive_headline_metrics
+    type: kpi
+    value: total_customers
+    label: Customers
+    style:
+      value:
+        format: compact
+  executive_monthly_revenue:
+    query: executive_monthly_sales
+    type: line
+    title: Monthly revenue
+    x: order_month
+    y: revenue
+    style:
+      axis_y:
+        labels:
+          format: currency
+  executive_revenue_by_store:
+    query: executive_sales_by_store
+    type: bar
+    title: Revenue by store
+    x: store_name
+    y: revenue
+    style:
+      axis_y:
+        labels:
+          format: currency
+  executive_product_sales_mix:
+    query: executive_product_mix
+    type: pie
+    title: Product sales mix
+    theta: product_sales
+    color: product_type
+    total:
+      label: Product sales
+    style:
+      inner_radius: 0.6
+      total:
+        value:
+          format: currency
+  executive_top_customers:
+    query: executive_top_customers
+    type: table
+    title: Top customers by revenue
+    style:
+      columns:
+        orders:
+          label: Orders
+          format: compact
+          align: right
+        revenue:
+          label: Revenue
+          format: currency
+          align: right
+        average_order_value:
+          label: Average order value
+          format: currency_whole
+          align: right
+
+  store_total_revenue:
+    query: store_network_summary
+    type: kpi
+    value: total_revenue
+    label: Total revenue
+    style:
+      value:
+        format: currency
+  store_total_orders:
+    query: store_network_summary
+    type: kpi
+    value: total_orders
+    label: Orders
+    style:
+      value:
+        format: compact
+  store_average_order_value:
+    query: store_network_summary
+    type: kpi
+    value: average_order_value
+    label: Average order value
+    style:
+      value:
+        format: currency_whole
+  store_active_stores:
+    query: store_network_summary
+    type: kpi
+    value: active_stores
+    label: Stores
+    style:
+      value:
+        format: compact
+  store_revenue_trend:
+    query: store_monthly_performance
+    type: line
+    title: Monthly revenue by store
+    x: order_month
+    y: revenue
+    color: store_name
+    style:
+      axis_y:
+        labels:
+          format: currency
+  store_revenue_last_12_months:
+    query: store_recent_performance
+    type: bar
+    title: Revenue by store — last 12 months
+    x: store_name
+    y: revenue_last_12_months
+    style:
+      axis_y:
+        labels:
+          format: currency
+  store_scorecard:
+    query: store_lifetime_performance
+    type: table
+    title: Store scorecard
+    style:
+      columns:
+        opened_on:
+          label: Opened
+        revenue:
+          label: Lifetime revenue
+          format: currency
+          align: right
+        average_monthly_revenue:
+          label: Avg. monthly revenue
+          format: currency
+          align: right
+        orders:
+          label: Orders
+          format: compact
+          align: right
+        customers:
+          label: Customers
+          format: compact
+          align: right
+        average_order_value:
+          label: Average order value
+          format: currency_whole
+          align: right
+        operating_months:
+          label: Operating months
+          format: compact
+          align: right
+
+  review_total_revenue:
+    query: executive_headline_metrics
+    type: kpi
+    value: total_revenue
+    label: Total revenue
+    style:
+      value:
+        format: currency
+  review_total_orders:
+    query: executive_headline_metrics
+    type: kpi
+    value: total_orders
+    label: Orders
+    style:
+      value:
+        format: compact
+  review_average_order_value:
+    query: executive_headline_metrics
+    type: kpi
+    value: average_order_value
+    label: Average order value
+    style:
+      value:
+        format: currency_whole
+  review_total_customers:
+    query: executive_headline_metrics
+    type: kpi
+    value: total_customers
+    label: Customers
+    style:
+      value:
+        format: compact
+  review_monthly_revenue:
+    query: executive_monthly_sales
+    type: line
+    title: 1. Business trajectory — monthly revenue
+    subtitle: Revenue has risen materially across the full history; use this as the top-level health trend.
+    x: order_month
+    y: revenue
+    style:
+      axis_y:
+        labels:
+          format: currency
+  review_revenue_by_store:
+    query: store_lifetime_performance
+    type: bar
+    title: 2. Growth engines — lifetime revenue by store
+    subtitle: Compare alongside average monthly revenue because stores have different operating histories.
+    x: store_name
+    y: revenue
+    style:
+      axis_y:
+        labels:
+          format: currency
+  review_store_scorecard:
+    query: store_lifetime_performance
+    type: table
+    title: Store comparison — normalize for operating time
+    style:
+      columns:
+        opened_on:
+          label: Opened
+        revenue:
+          label: Lifetime revenue
+          format: currency
+          align: right
+        average_monthly_revenue:
+          label: Avg. monthly revenue
+          format: currency
+          align: right
+        orders:
+          label: Orders
+          format: compact
+          align: right
+        customers:
+          label: Customers
+          format: compact
+          align: right
+        average_order_value:
+          label: Average order value
+          format: currency_whole
+          align: right
+        operating_months:
+          label: Operating months
+          format: compact
+          align: right
+  review_product_sales_mix:
+    query: executive_product_mix
+    type: pie
+    title: 3. Product strategy — sales mix by category
+    theta: product_sales
+    color: product_type
+    total:
+      label: Product sales
+    style:
+      inner_radius: 0.6
+      total:
+        value:
+          format: currency
+  review_top_products:
+    query: review_top_products
+    type: table
+    title: Product ranking — sales and demand
+    style:
+      columns:
+        line_items:
+          label: Line items
+          format: compact
+          align: right
+        product_sales:
+          label: Product sales
+          format: currency
+          align: right
+  review_customer_loyalty:
+    query: review_repeat_purchase_segments
+    type: bar
+    title: 4. Customer loyalty — revenue by order frequency
+    subtitle: Revenue concentration in repeat purchasers indicates the importance of retention.
+    x: order_frequency_segment
+    y: revenue
+    style:
+      axis_y:
+        labels:
+          format: currency
+  review_seasonal_revenue:
+    query: review_seasonality
+    type: bar
+    title: 5. Planning signal — revenue by calendar month
+    subtitle: Historical seasonal pattern across all years; use it to inform staffing and inventory planning.
+    x: calendar_month
+    y: revenue
+    style:
+      orientation: vertical
+      axis_y:
+        labels:
+          format: currency
+
+tabs:
+  id: commerce_view
+  position: top
+  default: executive-overview
+  items:
+    - id: executive-overview
+      title: Executive Overview
+      notes: Sales health, customer scale, product mix, and customer concentration.
+      rows:
+        - cols: [executive_total_revenue, executive_total_orders, executive_average_order_value, executive_total_customers]
+        - executive_monthly_revenue
+        - cols: [executive_revenue_by_store, executive_product_sales_mix]
+        - executive_top_customers
+    - id: store-performance
+      title: Store Performance & Expansion
+      notes: Location-level trends and like-for-like context across different store ages.
+      rows:
+        - cols: [store_total_revenue, store_total_orders, store_average_order_value, store_active_stores]
+        - store_revenue_trend
+        - store_revenue_last_12_months
+        - store_scorecard
+    - id: business-review
+      title: Commerce Business Review
+      notes: An executive narrative from business trajectory through operating actions.
+      rows:
+        - cols: [review_total_revenue, review_total_orders, review_average_order_value, review_total_customers]
+        - review_monthly_revenue
+        - review_revenue_by_store
+        - review_store_scorecard
+        - cols: [review_product_sales_mix, review_top_products]
+        - review_customer_loyalty
+        - review_seasonal_revenue
