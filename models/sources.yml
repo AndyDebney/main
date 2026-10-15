@@ -2,7 +2,7 @@ version: 2
 
 sources:
   - name: raw
-    database: ADEBNEYDEMODB2
+    database: ADEBNEYDEMODB
     schema: RAW
     tables:
       - name: customers
