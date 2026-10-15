@@ -528,8 +528,7 @@ tabs:
   position: top
   default: executive-overview
   items:
-    - id: executive-overview
-      title: Executive Overview
+    - title: Executive Overview
       notes: Sales health, customer scale, product mix, and customer concentration.
       rows:
         - cols: [executive_total_revenue, executive_total_orders, executive_average_order_value, executive_total_customers]
