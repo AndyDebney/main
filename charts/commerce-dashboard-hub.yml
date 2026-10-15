@@ -542,8 +542,7 @@ tabs:
         - store_revenue_trend
         - store_revenue_last_12_months
         - store_scorecard
-    - id: business-review
-      title: Commerce Business Review
+    - title: Commerce Business Review
       notes: An executive narrative from business trajectory through operating actions.
       rows:
         - cols: [review_total_revenue, review_total_orders, review_average_order_value, review_total_customers]
