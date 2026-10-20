@@ -4,7 +4,7 @@ with orders as (
 )
 
 select
-    order_id,
+    orderid,
     customer_id,
     store_id,
     try_to_timestamp_ntz(ordered_at) as ordered_at,
